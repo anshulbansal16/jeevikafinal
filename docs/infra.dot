@@ -1,0 +1,7 @@
+digraph INFRA {
+  node [ color = "black", fillcolor = "#E6E6E6", height =1, style = "filled,bold,rounded", fontname = "Arial" ];
+  "Vercel Preview Deployment" [ label = "Vercel Preview Deployment
+(Vercel::Deployment::Preview)", shape =rectangle, fillcolor = "#B7E0FF" ];
+  "Vercel Production Deployment" [ label = "Vercel Production Deployment
+(Vercel::Deployment::Production)", shape =rectangle, fillcolor = "#B7E0FF" ];
+}
