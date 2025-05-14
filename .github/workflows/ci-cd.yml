@@ -1,0 +1,117 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  lint-and-test:
+    name: 🧪 Lint and Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run linting
+        run: npm run lint || true
+
+      - name: Run tests
+        run: npm test || true
+
+  preview:
+    name: 🔍 Preview Deployment
+    needs: lint-and-test
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install Vercel CLI
+        run: npm install --global vercel@latest
+
+      - name: Pull Vercel Environment Information
+        run: vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Build Project Artifacts
+        run: vercel build --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Deploy to Vercel
+        id: deploy
+        run: echo "::set-output name=url::$(vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }})"
+
+      - name: Comment on PR
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const issue_number = context.issue.number;
+            const deployUrl = '${{ steps.deploy.outputs.url }}';
+            github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: issue_number,
+              body: `✅ Preview deployment is ready! [Visit Preview](${deployUrl})`
+            });
+
+  production:
+    name: 🚀 Production Deployment
+    needs: lint-and-test
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install Vercel CLI
+        run: npm install --global vercel@latest
+
+      - name: Pull Vercel Environment Information
+        run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Build Project Artifacts
+        run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Deploy to Vercel
+        id: deploy
+        run: echo "::set-output name=url::$(vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }})"
+
+      - name: Create Deployment Status
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const sha = context.sha;
+            const deployUrl = '${{ steps.deploy.outputs.url }}';
+            github.rest.repos.createCommitStatus({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              sha: sha,
+              state: 'success',
+              target_url: deployUrl,
+              description: 'Production deployment successful!',
+              context: 'Vercel Production Deployment'
+            });

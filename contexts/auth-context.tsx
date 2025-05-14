@@ -81,12 +81,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signUp = async (email: string, password: string) => {
     try {
+      // Get the current site URL instead of localhost
+      const siteUrl =
+        typeof window !== "undefined"
+          ? `${window.location.protocol}//${window.location.host}`
+          : process.env.NEXT_PUBLIC_SITE_URL ||
+            "https://eazypathsfinal.vercel.app/";
+        
       // Sign up the user
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
-          emailRedirectTo: `${window.location.origin}/auth/callback`,
+          emailRedirectTo: `${siteUrl}/auth/callback`,
           data: {
             email: email,
           }
@@ -98,17 +105,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return { data, error }
       }
 
-      // If successful and we have a user, set the user in state
-      if (data?.user) {
-        setUser(data.user)
-        
-        toast({
-          title: "Success",
-          description: "Account created successfully! Please check your email to verify your account.",
-        })
-        
-        // Redirect to onboarding
-        router.push("/onboarding")
+      // Important: Sign out immediately after signup to prevent auto-login
+      if (data?.session) {
+        await supabase.auth.signOut()
+        // Reset the user state
+        setUser(null)
       }
 
       return { data, error }

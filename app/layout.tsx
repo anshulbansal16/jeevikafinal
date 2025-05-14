@@ -31,7 +31,7 @@ export default function RootLayout({
               <main className="flex-1 bg-background">{children}</main>
               <footer className="border-t py-6 bg-background">
                 <div className="container mx-auto text-center">
-                  <p className="text-sm text-muted-foreground">© 2023 Eazypaths. All rights reserved.</p>
+                  <p className="text-sm text-muted-foreground">© 2025 Eazypaths. All rights reserved.</p>
                 </div>
               </footer>
               <FloatingAssistant />

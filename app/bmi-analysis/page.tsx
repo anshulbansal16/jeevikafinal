@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Card,
   CardContent,
@@ -22,6 +22,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { AuthRequired } from "@/components/auth-required";
+import { getUserProfile } from "@/lib/user-profile";
 
 export default function BMIAnalysisPage() {
   const [height, setHeight] = useState("");
@@ -33,8 +34,33 @@ export default function BMIAnalysisPage() {
   const [bmiValue, setBmiValue] = useState<string | null>(null);
   const [bmiCategory, setBmiCategory] = useState<string | null>(null);
   const [recommendations, setRecommendations] = useState<string[]>([]);
+  const [isLoadingProfile, setIsLoadingProfile] = useState(true);
 
   const { toast } = useToast();
+  
+  // Load user profile data when component mounts
+  useEffect(() => {
+    async function loadUserProfile() {
+      setIsLoadingProfile(true);
+      try {
+        const profile = await getUserProfile();
+        
+        if (profile) {
+          // Auto-fill form with user data if available
+          if (profile.height) setHeight(profile.height.toString());
+          if (profile.weight) setWeight(profile.weight.toString());
+          if (profile.age) setAge(profile.age.toString());
+          if (profile.gender) setGender(profile.gender);
+        }
+      } catch (error) {
+        console.error("Error loading user profile:", error);
+      } finally {
+        setIsLoadingProfile(false);
+      }
+    }
+    
+    loadUserProfile();
+  }, []);
 
   const calculateBMI = () => {
     let bmiValue: number;
@@ -295,7 +321,7 @@ export default function BMIAnalysisPage() {
               <Button
                 onClick={handleAnalyze}
                 className="w-full bg-gradient-to-r from-primary to-blue-600 hover:from-primary/90 hover:to-blue-500/90 text-white shadow-md hover:shadow-lg transition-all"
-                disabled={!height || !weight || !age || loading}
+                disabled={!height || !weight || !age || loading || isLoadingProfile}
               >
                 {loading ? (
                   <>

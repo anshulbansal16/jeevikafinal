@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Bot, X, Send, Minimize2, Maximize2, Loader2 } from "lucide-react"
+import { useAuth } from "@/contexts/auth-context"
 
 type Message = {
   role: "user" | "assistant"
@@ -14,10 +15,11 @@ type Message = {
 }
 
 export function FloatingAssistant() {
+  const { user } = useAuth() // Get authentication state
   const [isOpen, setIsOpen] = useState(false)
   const [isMinimized, setIsMinimized] = useState(false)
   const [messages, setMessages] = useState<Message[]>([
-    { role: "assistant", content: "Hello! I'm your health assistant. How can I help you today?" },
+    { role: "assistant", content: "Hello! I'm your health assistant bot. How can I help you today?" },
   ])
   const [input, setInput] = useState("")
   const [isLoading, setIsLoading] = useState(false)
@@ -44,24 +46,29 @@ export function FloatingAssistant() {
     setIsLoading(true)
 
     try {
-      // Simulate AI response
-      setTimeout(() => {
-        setMessages((prev) => [
-          ...prev,
-          {
-            role: "assistant",
-            content:
-              "Thank you for your question. While I can provide general health information, it's important to consult with a qualified healthcare professional for personalized advice.",
-          },
-        ])
-        setIsLoading(false)
-      }, 1500)
+       // Call the API endpoint instead of the direct function
+       const response = await fetch('/api/health-assistant', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ query: userMessage }),
+      });
+      
+      const data = await response.json();
+      
+      if (response.ok) {
+        setMessages((prev) => [...prev, { role: "assistant", content: data.response }]);
+      } else {
+        throw new Error(data.error || 'Failed to get response');
+      }
     } catch (error) {
       console.error("Error getting response:", error)
       setMessages((prev) => [
         ...prev,
         { role: "assistant", content: "Sorry, I encountered an error. Please try again." },
       ])
+    } finally {
       setIsLoading(false)
     }
   }
@@ -71,6 +78,11 @@ export function FloatingAssistant() {
       messagesEndRef.current.scrollIntoView({ behavior: "smooth" })
     }
   }, [messages])
+
+  // Don't render anything if user is not authenticated
+  if (!user) {
+    return null
+  }
 
   return (
     <div className="fixed bottom-4 right-4 z-50">

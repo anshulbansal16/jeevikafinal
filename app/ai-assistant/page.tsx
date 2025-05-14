@@ -17,7 +17,7 @@ export default function AIAssistantPage() {
   const [messages, setMessages] = useState<Message[]>([
     {
       role: "assistant",
-      content: "Hello! I'm your AI health assistant. How can I help you with your health questions today?",
+      content: "Hello! I'm your AI health assistant-bot. How can I help you with your health questions today?",
     },
   ])
   const [isLoading, setIsLoading] = useState(false)

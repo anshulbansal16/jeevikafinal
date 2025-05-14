@@ -75,24 +75,17 @@ export default function LoginPage() {
         return
       }
 
-      // Check if we have a user and session
-      if (data?.user) {
-        toast({
-          title: "Success",
-          description: "Account created successfully! Please check your email to verify your account.",
-        })
-        
-        // If we have a session, we can redirect to onboarding
-        if (data.session) {
-          router.push("/onboarding")
-        } else {
-          // Otherwise, stay on the login page
-          setIsLoading(false)
-        }
-      } else {
-        // Something went wrong
-        setIsLoading(false)
-      }
+      // Show success message but don't redirect
+      toast({
+        title: "Success",
+        description: "Account created successfully! Please check your email to verify your account before logging in.",
+      })
+      
+      // Reset form and loading state
+      setEmail("")
+      setPassword("")
+      setIsLoading(false)
+      
     } catch (error) {
       console.error("Signup error:", error)
       toast({
