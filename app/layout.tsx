@@ -11,9 +11,8 @@ import { Toaster } from "@/components/ui/toaster"
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "Eazypaths - Health Check-Up Recommendations",
-  description: "AI-Powered Health Check-Up Recommendation Platform",
-    generator: 'v0.dev'
+  title: "Jeevika - Your Health, Decoded",
+  description: "AI-powered insights. Personalized care. Instant results.",
 }
 
 export default function RootLayout({
@@ -31,7 +30,7 @@ export default function RootLayout({
               <main className="flex-1 bg-background">{children}</main>
               <footer className="border-t py-6 bg-background">
                 <div className="container mx-auto text-center">
-                  <p className="text-sm text-muted-foreground">© 2025 Eazypaths. All rights reserved.</p>
+                  <p className="text-sm text-muted-foreground">© 2025 Jeevika. All rights reserved.</p>
                 </div>
               </footer>
               <FloatingAssistant />

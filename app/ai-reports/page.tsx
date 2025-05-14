@@ -16,6 +16,30 @@ import { useRouter } from "next/navigation"
 import { useToast } from "@/components/ui/use-toast"
 import { AuthRequired } from "@/components/auth-required"
 
+// Helper function to call the AI Reports API
+async function callAIReportsAPI(reportData: any) {
+  try {
+    const response = await fetch('/api/ai-reports', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ reportData })
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error("AI API error:", errorText);
+      throw new Error(errorText);
+    }
+
+    const result = await response.json();
+    console.log(result); // Handle the result as needed
+    return result;
+  } catch (err) {
+    console.error("Unexpected AI fetch error:", err);
+    throw err;
+  }
+}
+
 export default function AIReportsPage() {
   const [activeTab, setActiveTab] = useState("manual")
   const [reportText, setReportText] = useState("")
@@ -56,7 +80,10 @@ export default function AIReportsPage() {
 
       const { data, error } = await supabase.storage.from("health_reports").upload(fileName, file)
 
-      if (error) throw error
+      if (error) {
+        console.error("Supabase upload error details:", JSON.stringify(error, null, 2));
+        throw error
+      }
 
       // Get public URL
       const { data: urlData } = supabase.storage.from("health_reports").getPublicUrl(data.path)
@@ -89,7 +116,10 @@ export default function AIReportsPage() {
         uploaded_at: new Date().toISOString(),
       })
 
-      if (error) throw error
+      if (error) {
+        console.error("Supabase save error details:", JSON.stringify(error, null, 2));
+        throw error
+      }
 
       toast({
         title: "Report Saved",
@@ -129,35 +159,19 @@ export default function AIReportsPage() {
       // Save report to database
       await saveReport(reportUrl)
 
-      // Simulate AI analysis
-      setTimeout(() => {
-        setAnalysis(`
-Blood Test Analysis Results
-
-Abnormal Values:
-- LDL Cholesterol: 165 mg/dL (High) - Normal range: <130 mg/dL
-- HDL Cholesterol: 38 mg/dL (Low) - Normal range: >40 mg/dL
-- Fasting Blood Sugar: 105 mg/dL (Slightly elevated) - Normal range: 70-99 mg/dL
-
-Interpretation:
-Your LDL cholesterol is elevated, which is often referred to as "bad cholesterol" because it can build up in your arteries. Your HDL cholesterol is slightly below the recommended level. HDL is often called "good cholesterol" as it helps remove other forms of cholesterol from your bloodstream. Your fasting blood sugar is slightly elevated, which may indicate prediabetes.
-
-Lifestyle Advice:
-1. Consider reducing saturated fats and increasing fiber in your diet
-2. Regular physical activity can help improve both cholesterol levels
-3. Limit added sugars and refined carbohydrates to help manage blood sugar
-4. Consider incorporating more omega-3 fatty acids from sources like fish or flaxseeds
-
-Medical Recommendation:
-Based on these results, it would be advisable to consult with your healthcare provider for a more comprehensive evaluation, especially regarding your cholesterol levels and blood sugar. They may recommend lifestyle modifications or further testing.
-        `)
-
-        setLoading(false)
-      }, 2000)
+      // Call AI Reports API
+      let aiResult
+      if (activeTab === "upload" && reportUrl) {
+        aiResult = await callAIReportsAPI({ reportImage: reportUrl })
+      } else {
+        aiResult = await callAIReportsAPI({ reportText })
+      }
+      setAnalysis(aiResult.analysis || aiResult.raw || "No analysis available.")
     } catch (error) {
       setLoading(false)
       console.error("Analysis error:", error)
     }
+    setLoading(false)
   }
 
   return (

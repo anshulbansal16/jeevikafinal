@@ -9,10 +9,10 @@ export default function HomePage() {
       {/* Hero Section with Gradient Background */}
       <div className="max-w-4xl mx-auto text-center mb-16 p-8 rounded-2xl gradient-bg-1">
         <h1 className="text-4xl font-bold tracking-tight mb-4 sm:text-5xl bg-clip-text text-transparent bg-gradient-to-r from-primary to-blue-600">
-          AI-Powered Health Check-Up Recommendations
+          Your Health, Decoded.
         </h1>
         <p className="text-xl text-muted-foreground mb-8">
-          Get personalized health check-up recommendations based on your health profile and concerns.
+          AI-powered insights. Personalized care. Instant results.
         </p>
         <div className="flex flex-wrap justify-center">
           <EnhancedButton asChild variant="primary" size="xl" className="animate-pulse-slow">
@@ -184,7 +184,7 @@ export default function HomePage() {
           Ready to Take Control of Your Health?
         </h2>
         <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-          Join thousands of users who are making informed health decisions with Eazypaths.
+          Join thousands of users who are making informed health decisions with Jeevika.
         </p>
         <EnhancedButton asChild variant="primary" size="xl" className="animate-pulse-slow">
           <Link href="/login">

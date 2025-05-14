@@ -1,6 +1,9 @@
-# AI-Powered Health Check-Up Recommendations Platform with Personalized Insights
+# Jeevika
 
-Eazypaths is a comprehensive health management platform that leverages AI to provide personalized health check-up recommendations, BMI analysis, and interactive health assistance. The platform helps users make informed health decisions by analyzing medical reports, tracking health metrics, and providing AI-powered health guidance.
+Your Health, Decoded.
+AI-powered insights. Personalized care. Instant results.
+
+Jeevika is a comprehensive health management platform that leverages AI to provide personalized health check-up recommendations, BMI analysis, and interactive health assistance. The platform helps users make informed health decisions by analyzing medical reports, tracking health metrics, and providing AI-powered health guidance.
 
 The platform combines modern web technologies with artificial intelligence to deliver features including:
 - AI-powered analysis of medical reports and blood test results
@@ -39,7 +42,7 @@ The platform combines modern web technologies with artificial intelligence to de
 1. Clone the repository:
 ```bash
 git clone <repository-url>
-cd eazypaths
+cd jeevika
 ```
 
 2. Install dependencies:
@@ -170,3 +173,5 @@ vercel deploy
    - Check deployment status in Vercel dashboard
    - Verify environment variables
    - Test authentication flow
+
+Join thousands of users who are making informed health decisions with Jeevika.

@@ -30,7 +30,7 @@ export default function UpdatedVersionPreview() {
     <div className="container mx-auto py-8 space-y-8">
       <div className="text-center">
         <h1 className="text-3xl font-bold mb-2 bg-clip-text text-transparent bg-gradient-to-r from-primary to-blue-600">
-          Eazypaths Updated Version Preview
+          Jeevika Updated Version Preview
         </h1>
         <p className="text-muted-foreground">
           Preview of the updated application with enhanced buttons, fixed build errors, and CI/CD workflow
@@ -414,7 +414,7 @@ export default function UpdatedVersionPreview() {
                   <div>
                     <p className="font-medium">GitHub Actions Workflow</p>
                     <p className="text-sm">
-                      Continuous integration and deployment workflow for your Eazypaths project
+                      Continuous integration and deployment workflow for your Jeevika project
                     </p>
                   </div>
                 </div>

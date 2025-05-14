@@ -24,7 +24,7 @@ export function Logo({ className, size = "md" }: LogoProps) {
       <span
         className={`font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-blue-600 ${sizes[size].text}`}
       >
-        Eazypaths
+        Jeevika
       </span>
     </Link>
   )

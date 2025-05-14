@@ -86,7 +86,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         typeof window !== "undefined"
           ? `${window.location.protocol}//${window.location.host}`
           : process.env.NEXT_PUBLIC_SITE_URL ||
-            "https://eazypathsfinal.vercel.app/";
+            "https://jeevikafinal.vercel.app/";
         
       // Sign up the user
       const { data, error } = await supabase.auth.signUp({
