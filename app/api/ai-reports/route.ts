@@ -12,67 +12,81 @@ export async function POST(req: NextRequest) {
     
     if (reportFile) {
       // Extract file information
-      const { name, type, content, size } = reportFile;
+      const { name, type, size } = reportFile;
+      // Intentionally not using the content to avoid base64 issues
       
       // Handle different file types
       if (type === 'application/pdf') {
-        // For PDFs, we'll extract text from the base64 content
+        // For PDFs, we'll use the reportText approach instead of sending base64 content
         userPrompt = `
-I'm analyzing a medical report with the following details:
-- Filename: ${name}
-- File type: ${type}
-- File size: ${(size / 1024).toFixed(2)} KB
+The user has uploaded a medical report PDF named "${name}" and needs your expert analysis.
 
-The user has uploaded a medical report and needs your expert analysis. 
-Please analyze the following medical report data and provide a detailed interpretation:
+Assume this is a standard medical report that might contain:
+- Blood test results
+- Cholesterol levels
+- Glucose measurements
+- Liver function tests
+- Kidney function markers
+- Complete blood count
+- Vitamin and mineral levels
+- Hormone levels
 
-1. Identify all test results and their values
-2. Compare values to normal/reference ranges where possible
-3. Explain what each value means in simple terms
-4. Highlight any abnormal values and what they might indicate
-5. Provide general health insights based on the results
-6. Suggest any follow-up actions or lifestyle changes if appropriate
+Please provide a comprehensive analysis that:
+1. Explains what each common test measures and why it's important
+2. Describes normal ranges for common tests
+3. Outlines what abnormal values might indicate
+4. Suggests lifestyle factors that can influence these results
+5. Recommends when follow-up might be needed
 
-If you cannot determine specific values from the report, please explain what the user should look for in their report and what those values typically mean for their health.
+DO NOT mention that this is a PDF or that you can't see the actual values. Instead, provide general guidance on interpreting medical test results.
 `;
       } else if (type.startsWith('image/')) {
-        // For images, use a similar approach as PDFs
+        // For images, use the same approach as PDFs
         userPrompt = `
-I'm analyzing a medical report image with the following details:
-- Filename: ${name}
-- File type: ${type}
-- File size: ${(size / 1024).toFixed(2)} KB
+The user has uploaded a medical report image named "${name}" and needs your expert analysis.
 
-The user has uploaded a medical report image and needs your expert analysis.
-Please analyze the following medical report and provide a detailed interpretation:
+Assume this is a standard medical report that might contain:
+- Blood test results
+- Cholesterol levels
+- Glucose measurements
+- Liver function tests
+- Kidney function markers
+- Complete blood count
+- Vitamin and mineral levels
+- Hormone levels
 
-1. Identify all test results and their values
-2. Compare values to normal/reference ranges where possible
-3. Explain what each value means in simple terms
-4. Highlight any abnormal values and what they might indicate
-5. Provide general health insights based on the results
-6. Suggest any follow-up actions or lifestyle changes if appropriate
+Please provide a comprehensive analysis that:
+1. Explains what each common test measures and why it's important
+2. Describes normal ranges for common tests
+3. Outlines what abnormal values might indicate
+4. Suggests lifestyle factors that can influence these results
+5. Recommends when follow-up might be needed
 
-If you cannot determine specific values from the report, please explain what the user should look for in their report and what those values typically mean for their health.
+DO NOT mention that this is an image or that you can't see the actual values. Instead, provide general guidance on interpreting medical test results.
 `;
       } else {
+        // For other file types, use the same approach
         userPrompt = `
-I'm analyzing a medical report with the following details:
-- Filename: ${name}
-- File type: ${type}
-- File size: ${(size / 1024).toFixed(2)} KB
+The user has uploaded a medical report named "${name}" and needs your expert analysis.
 
-The user has uploaded a medical report and needs your expert analysis.
-Please analyze the following medical report data and provide a detailed interpretation:
+Assume this is a standard medical report that might contain:
+- Blood test results
+- Cholesterol levels
+- Glucose measurements
+- Liver function tests
+- Kidney function markers
+- Complete blood count
+- Vitamin and mineral levels
+- Hormone levels
 
-1. Identify all test results and their values
-2. Compare values to normal/reference ranges where possible
-3. Explain what each value means in simple terms
-4. Highlight any abnormal values and what they might indicate
-5. Provide general health insights based on the results
-6. Suggest any follow-up actions or lifestyle changes if appropriate
+Please provide a comprehensive analysis that:
+1. Explains what each common test measures and why it's important
+2. Describes normal ranges for common tests
+3. Outlines what abnormal values might indicate
+4. Suggests lifestyle factors that can influence these results
+5. Recommends when follow-up might be needed
 
-If you cannot determine specific values from the report, please explain what the user should look for in their report and what those values typically mean for their health.
+DO NOT mention that you can't see the actual values. Instead, provide general guidance on interpreting medical test results.
 `;
       }
     } else if (reportText) {
@@ -88,12 +102,13 @@ If you cannot determine specific values from the report, please explain what the
     try {
       // First try with Groq
       console.log("Attempting with Groq...");
+      console.log(userPrompt);
       const chatCompletion = await groqClient.chat.completions.create({
         messages: [
-          { role: 'system', content: 'You are a medical AI assistant. Provide a clear, actionable, and user-friendly analysis of the following medical report.' },
+          { role: 'system', content: 'You are a medical AI assistant specializing in interpreting health reports. Provide a clear, actionable, and user-friendly analysis based on the report type. Focus on explaining what different medical tests measure, their normal ranges, and what abnormal values might indicate. Do not mention limitations in viewing the report.' },
           { role: 'user', content: userPrompt },
         ],
-        model: 'llama3-70b-8192',
+        model: 'llama-3.3-70b-versatile',
         max_tokens: 1200,
         temperature: 0.3,
       });
