@@ -70,25 +70,26 @@ export default function AIReportsPage() {
 
   const uploadFile = async (): Promise<string | null> => {
     if (!file || !user) return null
-
     try {
       setUploadLoading(true)
 
-      // Upload file to Supabase Storage
-      const fileExt = file.name.split(".").pop()
-      const fileName = `${user.id}/${Date.now()}.${fileExt}`
+      // Create a server-side API endpoint to handle the upload
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('userId', user.id);
+      
+      const response = await fetch('/api/upload-health-report', {
+        method: 'POST',
+        body: formData,
+      });
 
-      const { data, error } = await supabase.storage.from("health_reports").upload(fileName, file)
-
-      if (error) {
-        console.error("Supabase upload error details:", JSON.stringify(error, null, 2));
-        throw error
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to upload file');
       }
-
-      // Get public URL
-      const { data: urlData } = supabase.storage.from("health_reports").getPublicUrl(data.path)
-
-      return urlData.publicUrl
+      
+      const result = await response.json();
+      return result.url;
     } catch (error: any) {
       console.error("File upload error:", error)
       toast({
@@ -106,7 +107,7 @@ export default function AIReportsPage() {
     if (!user) return
 
     try {
-      // Save report to database
+      // Save report to database with explicit RLS fields
       const { error } = await supabase.from("health_reports").insert({
         user_id: user.id,
         report_name: reportName || "Unnamed Report",
@@ -114,7 +115,7 @@ export default function AIReportsPage() {
         report_url: reportUrl,
         report_data: activeTab === "manual" ? { text: reportText } : null,
         uploaded_at: new Date().toISOString(),
-      })
+      }).select()
 
       if (error) {
         console.error("Supabase save error details:", JSON.stringify(error, null, 2));
@@ -161,8 +162,23 @@ export default function AIReportsPage() {
 
       // Call AI Reports API
       let aiResult
-      if (activeTab === "upload" && reportUrl) {
-        aiResult = await callAIReportsAPI({ reportImage: reportUrl })
+      if (activeTab === "upload" && file) {
+        // Send the file directly instead of the URL
+        const fileReader = new FileReader();
+        const fileContent = await new Promise<string>((resolve) => {
+          fileReader.onload = (e) => resolve(e.target?.result as string);
+          fileReader.readAsDataURL(file);
+        });
+        
+        aiResult = await callAIReportsAPI({ 
+          reportFile: {
+            name: file.name,
+            type: file.type,
+            content: fileContent,
+            size: file.size
+          },
+          reportUrl: reportUrl // Also send URL for storage reference
+        });
       } else {
         aiResult = await callAIReportsAPI({ reportText })
       }
